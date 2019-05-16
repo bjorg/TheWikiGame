@@ -95,64 +95,64 @@ namespace LambdaSharp.Challenge.TheWikiGame {
                 return;
             }
 
-            // check if page has already been parsed
-            var page = await GetRecord<Page>(current);
-            if(page == null) {
-                page = new Page {
+            // check if article has already been parsed
+            var article = await GetRecord<Article>(current);
+            if(article == null) {
+                article = new Article {
                     ID = current
                 };
 
-                // attempt to parse page
+                // attempt to parse article
                 try {
 
-                    // get page contents of wikipedia article
+                    // get article contents of wikipedia article
                     var response = await _httpClient.GetAsync(current);
                     var html = await response.Content.ReadAsStringAsync();
 
-                    // go over all links in page
+                    // go over all links in article
                     var uri = new Uri(current);
                     var foundLinks = new HashSet<string>();
                     foreach(var link in HelperFunctions.FindLinks(html)) {
 
                         // format internal links and attempt to parse for validity
-                        Uri pageLink = null;
+                        Uri articleLink = null;
                         try {
-                            pageLink = new Uri(HelperFunctions.FixInternalLink(link, uri));
+                            articleLink = new Uri(HelperFunctions.FixInternalLink(link, uri));
                         } catch {
                             continue;
                         }
 
                         // ignore external links
-                        if(!pageLink.Host.Equals(uri.Host)) {
+                        if(!articleLink.Host.Equals(uri.Host)) {
                             continue;
                         }
 
                         // check if link is a "Category:" or "File:" link
-                        if(pageLink.AbsolutePath.Contains(":")) {
+                        if(articleLink.AbsolutePath.Contains(":")) {
                             continue;
                         }
 
                         // remove query and fragment when present
-                        if((pageLink.Fragment != "") || (pageLink.Query != "")) {
-                            pageLink = new UriBuilder(pageLink) {
+                        if((articleLink.Fragment != "") || (articleLink.Query != "")) {
+                            articleLink = new UriBuilder(articleLink) {
                                 Fragment = "",
                                 Query = ""
                             }.Uri;
                         }
 
-                        // and new page link
-                        foundLinks.Add(pageLink.ToString());
+                        // add new article link
+                        foundLinks.Add(articleLink.ToString());
                     }
-                    page.Links.AddRange(foundLinks);
+                    article.Links.AddRange(foundLinks);
                 } catch(Exception e) {
 
-                    // store page without links so we can move one and don't repeat this error
+                    // store article without links so we can move one and don't repeat this error
                     LogErrorAsWarning(e);
                 }
-                await PutRecord(page);
+                await PutRecord(article);
 
-                // check if the page we analyzed contains the destination
-                if(page.Links.Contains(message.Target)) {
+                // check if the article we analyzed contains the destination
+                if(article.Links.Contains(message.Target)) {
                     await FoundRoute(new Message {
                         Origin = message.Origin,
                         Target = message.Target,
@@ -165,7 +165,7 @@ namespace LambdaSharp.Challenge.TheWikiGame {
             }
 
             // submit all links for analysis
-            await Task.WhenAll(page.Links.Select(link => _sqsClient.SendMessageAsync(new SendMessageRequest {
+            await Task.WhenAll(article.Links.Select(link => _sqsClient.SendMessageAsync(new SendMessageRequest {
                 QueueUrl = _queueUrl,
                 MessageBody = SerializeJson(new Message {
                     Origin = message.Origin,

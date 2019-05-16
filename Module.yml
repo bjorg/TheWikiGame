@@ -1,5 +1,5 @@
 Module: LambdaSharp.Challenge.TheWikiGame
-Description: Find a sequence of links from one Wikipedia page to another
+Description: Find a sequence of links from one Wikipedia article to another
 Items:
 
   - Resource: LinksTable
@@ -18,15 +18,15 @@ Items:
 
   - Function: FindLinksFunction
     Description: >-
-      Check if sequence is complete, otherwise parse new pages until
-      a sequence is found or the search depth is exhausted.
+      Check if sequence is complete, otherwise parse new articles until
+      a sequence is found or the search depth is exhausted
     Memory: 256
     Timeout: 30
     Sources:
       - Sqs: AnalyzeQueue
 
   - Resource: AnalyzeQueue
-    Description: Queue containing all Wikipedia pages to analyze
+    Description: Queue containing Wikipedia articles to analyze
     Scope: FindLinksFunction
     Type: AWS::SQS::Queue
     Allow: Send,Receive

@@ -12,11 +12,11 @@ namespace LambdaSharp.Challenge.TheWikiGame {
         public List<string> Path { get; set; } = new List<string>();
     }
 
-    public class Page {
+    public class Article {
 
         //--- Properties ---
 
-        // ID = $"{pageUrl}"
+        // ID = $"{articleUrl}"
         public string ID { get; set; }
         public List<string> Links { get; set; } = new List<string>();
     }

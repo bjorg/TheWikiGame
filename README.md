@@ -28,7 +28,7 @@ To kick off a search, submit a JSON to the SQS queue specifying the origin and t
 ```json
 {
   "Origin": "https://en.wikipedia.org/wiki/Apple",
-  "Target": "https://en.wikipedia.org/wiki/Seed",
+  "Target": "https://en.wikipedia.org/wiki/Earth",
   "Depth": 3
 }
 ```

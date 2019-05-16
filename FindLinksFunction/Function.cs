@@ -44,7 +44,7 @@ namespace LambdaSharp.Challenge.TheWikiGame {
             _snsClient = new AmazonSimpleNotificationServiceClient();
 
             // read settings
-            _queueUrl = config.ReadSqsQueueUrl("AnalyzePageQueue");
+            _queueUrl = config.ReadSqsQueueUrl("AnalyzeQueue");
             _table = Table.LoadTable(_dynamoDbClient, config.ReadDynamoDBTableName("LinksTable"));
             _topic = config.ReadText("NotifyFoundTopic");
         }
@@ -53,59 +53,64 @@ namespace LambdaSharp.Challenge.TheWikiGame {
 
             // validate message
             if(string.IsNullOrEmpty(message.Origin)) {
-                LogInfo("empty FROM field");
+                LogInfo("empty ORIGIN field");
                 return;
             }
             if(string.IsNullOrEmpty(message.Target)) {
-                LogInfo("empty TO field");
+                LogInfo("empty TARGET field");
                 return;
-            }
-
-            // check if current URL is set
-            if(message.Current == null) {
-                message.Current = message.Origin;
-            }
-
-            // check if origin link is already in the path
-            if(message.Path.Count == 0) {
-                message.Path.Add(message.Origin);
             }
 
             // check if route has already been solved
             var route = await GetRecord<Route>($"{message.Origin}::{message.Target}");
             if(route != null) {
                 LogInfo($"CACHED => {string.Join(" -> ", route.Path)}");
+
+                // check if this was a seed message
+                if(!message.Path.Any()) {
+                    await FoundRoute(new Message {
+                        Origin = message.Origin,
+                        Target = message.Target,
+                        Path = route.Path
+                    });
+                }
                 return;
             }
 
+            // check if origin link is already in the path
+            if(!message.Path.Any()) {
+                message.Path.Add(message.Origin);
+            }
+
             // check if destination was found
-            if(message.Current == message.Target) {
+            var current = message.Path.Last();
+            if(current == message.Target) {
                 await FoundRoute(message);
                 return;
             }
 
             // stop processing because we have reached the maximum depth
             if(message.Depth <= 0) {
-                LogInfo($"STOP => ignoring URL '{message.Current}' because we have reached the maximum depth");
+                LogInfo($"STOP => ignoring URL '{current}' because we have reached the maximum depth");
                 return;
             }
 
             // check if page has already been parsed
-            var page = await GetRecord<Page>(message.Current);
+            var page = await GetRecord<Page>(current);
             if(page == null) {
                 page = new Page {
-                    ID = message.Current
+                    ID = current
                 };
 
                 // attempt to parse page
                 try {
 
                     // get page contents of wikipedia article
-                    var response = await _httpClient.GetAsync(message.Current);
+                    var response = await _httpClient.GetAsync(current);
                     var html = await response.Content.ReadAsStringAsync();
 
                     // go over all links in page
-                    var uri = new Uri(message.Current);
+                    var uri = new Uri(current);
                     var foundLinks = new HashSet<string>();
                     foreach(var link in HelperFunctions.FindLinks(html)) {
 
@@ -151,7 +156,6 @@ namespace LambdaSharp.Challenge.TheWikiGame {
                     await FoundRoute(new Message {
                         Origin = message.Origin,
                         Target = message.Target,
-                        Current = message.Target,
                         Path = message.Path.Append(message.Target).ToList()
                     });
 
@@ -166,7 +170,6 @@ namespace LambdaSharp.Challenge.TheWikiGame {
                 MessageBody = SerializeJson(new Message {
                     Origin = message.Origin,
                     Target = message.Target,
-                    Current = link,
                     Depth = message.Depth - 1,
                     Path = message.Path.Append(link).ToList()
                 })})

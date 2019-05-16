@@ -23,9 +23,9 @@ Items:
     Memory: 256
     Timeout: 30
     Sources:
-      - Sqs: AnalyzePageQueue
+      - Sqs: AnalyzeQueue
 
-  - Resource: AnalyzePageQueue
+  - Resource: AnalyzeQueue
     Description: Queue containing all Wikipedia pages to analyze
     Scope: FindLinksFunction
     Type: AWS::SQS::Queue

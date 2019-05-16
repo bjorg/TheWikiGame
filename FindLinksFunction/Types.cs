@@ -26,7 +26,6 @@ namespace LambdaSharp.Challenge.TheWikiGame {
         //--- Properties ---
         public string Origin { get; set; }
         public string Target { get; set; }
-        public string Current { get; set; }
         public int Depth { get; set; }
         public List<string> Path { get; set; } = new List<string>();
     }

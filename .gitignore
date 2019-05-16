@@ -1,4 +1,3 @@
 .DS_Store
-/Wiki/bin
-/Wiki/obj
-/bin
+bin
+obj

@@ -1,36 +1,38 @@
-# The Module Name is used as prefix for all contained resources.
-Module: My.Wiki
-
-# The Module Version is shown in the CloudFormation stack and Lambda function descriptions.
-Version: 1.0-DEV
-
-# The Module Description is shown in the AWS CloudFormation console with the version number.
-Description: Module description
-
-# The Items section defines values and resources for the module.
+Module: LambdaSharp.Challenge.TheWikiGame
+Description: Find a sequence of links from one Wikipedia page to another
 Items:
 
-  - Resource: Table
-    Scope:
-      - Wiki
-    Description: WikiStore
+  - Resource: LinksTable
+    Description: DynamoDB table storing all found links and sequences
+    Scope: FindLinksFunction
     Type: AWS::DynamoDB::Table
-    Allow: Full
+    Allow: ReadWrite
     Properties:
       BillingMode: PAY_PER_REQUEST
       AttributeDefinitions:
-        - AttributeName: WikiId
+        - AttributeName: ID
           AttributeType: S
       KeySchema:
-        - AttributeName: WikiId
+        - AttributeName: ID
           KeyType: HASH
-      StreamSpecification:
-        StreamViewType: NEW_IMAGE
 
-  - Function: Wiki
-    Description: Beat The Wiki Game
+  - Function: FindLinksFunction
+    Description: >-
+      Check if sequence is complete, otherwise parse new pages until
+      a sequence is found or the search depth is exhausted.
     Memory: 256
     Timeout: 30
     Sources:
-      - DynamoDB: Table
-        BatchSize: 15
+      - Sqs: AnalyzePageQueue
+
+  - Resource: AnalyzePageQueue
+    Description: Queue containing all Wikipedia pages to analyze
+    Scope: FindLinksFunction
+    Type: AWS::SQS::Queue
+    Allow: Send,Receive
+
+  - Resource: NotifyFoundTopic
+    Description: Notification topic for sending out a found solution for The Wiki Game
+    Scope: FindLinksFunction
+    Type: AWS::SNS::Topic
+    Allow: Publish

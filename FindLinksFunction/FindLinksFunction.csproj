@@ -9,11 +9,14 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Amazon.Lambda.Core" Version="1.1.0"/>
-    <PackageReference Include="Amazon.Lambda.Serialization.Json" Version="1.5.0"/>
-    <PackageReference Include="LambdaSharp" Version="0.6.0.*"/>
     <PackageReference Include="Amazon.Lambda.DynamoDBEvents" Version="1.1.0"/>
+    <PackageReference Include="Amazon.Lambda.Serialization.Json" Version="1.5.0"/>
     <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.3.101.9"/>
-    <PackageReference Include="AWSSDK.SQS" Version="3.3.100.19"/>
     <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.3.101.8"/>
+    <PackageReference Include="AWSSDK.SQS" Version="3.3.100.19"/>
+    <PackageReference Condition="'$(LAMBDASHARP)'==''" Include="LambdaSharp" Version="0.6" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(LAMBDASHARP)'!=''">
+    <ProjectReference Include="$(LAMBDASHARP)/src/LambdaSharp/LambdaSharp.csproj" />
   </ItemGroup>
 </Project>

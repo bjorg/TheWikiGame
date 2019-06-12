@@ -45,9 +45,6 @@ namespace LambdaSharp.Challenge.TheWikiGame {
 
     public class Function : ALambdaQueueFunction<Message> {
 
-        //--- Class Fields ---
-        private static HttpClient _httpClient = new HttpClient();
-
         //--- Fields ---
         private IAmazonDynamoDB _dynamoDbClient;
         private IAmazonSQS _sqsClient;
@@ -127,7 +124,7 @@ namespace LambdaSharp.Challenge.TheWikiGame {
                 try {
 
                     // get article contents of wikipedia article
-                    var response = await _httpClient.GetAsync(current);
+                    var response = await HttpClient.GetAsync(current);
                     var html = await response.Content.ReadAsStringAsync();
 
                     // go over all links in article

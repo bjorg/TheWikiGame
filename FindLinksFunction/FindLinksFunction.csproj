@@ -2,6 +2,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <Deterministic>true</Deterministic>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <RootNamespace>LambdaSharp.Challenge.TheWikiGame</RootNamespace>
     <AWSProjectType>Lambda</AWSProjectType>
@@ -14,9 +15,9 @@
     <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.3.101.9"/>
     <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.3.101.8"/>
     <PackageReference Include="AWSSDK.SQS" Version="3.3.100.19"/>
-    <PackageReference Condition="'$(LAMBDASHARP)'==''" Include="LambdaSharp" Version="0.6.0.1" />
   </ItemGroup>
-  <ItemGroup Condition="'$(LAMBDASHARP)'!=''">
-    <ProjectReference Include="$(LAMBDASHARP)/src/LambdaSharp/LambdaSharp.csproj" />
+  <ItemGroup>
+    <PackageReference Condition="'$(LAMBDASHARP)'==''" Include="LambdaSharp" Version="0.6.0.1"/>
+    <ProjectReference Condition="'$(LAMBDASHARP)'!=''" Include="$(LAMBDASHARP)/src/LambdaSharp/LambdaSharp.csproj" />
   </ItemGroup>
 </Project>

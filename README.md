@@ -40,7 +40,7 @@ To receive a notification about the found path, subscribe to the SNS topic creat
 * [Sign up for AWS account](https://aws.amazon.com/)
 * [Install .Net 2.1 or later](https://dotnet.microsoft.com/download/dotnet-core/2.1)
 * [Install AWS CLI](https://aws.amazon.com/cli/)
-* [Install the λ# Tool](https://github.com/LambdaSharp/LambdaSharpTool)
+* [Install the LambdaSharp CLI](https://github.com/LambdaSharp/LambdaSharpTool)
 
 ### Clone the GitHub Repository
 
@@ -49,7 +49,7 @@ git clone git@github.com:bjorg/TheWikiGame.git
 ```
 
 ### Deploy Solution
-NOTE: If you need to setup λ# before you can deploy. See the [λ# website](https://lambdasharp.net) for instructions.
+NOTE: If you need to setup LambdaSharp before you can deploy. See the [LambdaSharp website](https://lambdasharp.net) for instructions.
 
 ```
 cd TheWikiGame
